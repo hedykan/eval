@@ -28,6 +28,10 @@ type EvalNode struct {
 	NodeArr []*EvalNode
 }
 
+type EvalValue interface {
+	int | string
+}
+
 func NewEvalNode(str string) (*EvalNode, error) {
 	node := new(EvalNode)
 	node.Input(str)
@@ -53,6 +57,12 @@ func (node *EvalNode) Parse() error {
 		}
 		node.NodeArr = append(node.NodeArr, subNode)
 	}
+	return nil
+}
+
+// 求值
+func (node *EvalNode) Eval() error {
+
 	return nil
 }
 

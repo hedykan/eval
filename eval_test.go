@@ -25,9 +25,9 @@ func TestParse(t *testing.T) {
 }
 
 func TestOperate(t *testing.T) {
-	node, err := NewEvalNode("[+ 1 2 3]")
+	node, err := NewEvalNode("[]")
 	if err != nil {
 		t.Error(err.Error())
 	}
-	fmt.Println(opMap[node.NodeArr[0].Value](node))
+	fmt.Println(node)
 }
