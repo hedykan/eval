@@ -6,10 +6,12 @@ import (
 	"strings"
 )
 
-var opMap map[string]func(*EvalNode) (any, error)
+type operateMap map[string]func(*EvalNode) (any, error)
+
+var opMap operateMap
 
 func init() {
-	opMap = make(map[string]func(*EvalNode) (any, error))
+	opMap = make(operateMap)
 	opMap["+"] = func(en *EvalNode) (any, error) {
 		sum := 0
 		for _, node := range en.NodeArr[1:] {
@@ -26,6 +28,7 @@ func init() {
 type EvalNode struct {
 	Value   string
 	NodeArr []*EvalNode
+	Res     string
 }
 
 type EvalValue interface {
@@ -62,7 +65,7 @@ func (node *EvalNode) Parse() error {
 
 // 求值
 func (node *EvalNode) Eval() error {
-
+	opMap[node.Value](node)
 	return nil
 }
 
