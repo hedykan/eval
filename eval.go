@@ -2,37 +2,13 @@ package eval
 
 import (
 	"errors"
-	"strconv"
 	"strings"
 )
 
-type operateMap map[string]func(*EvalNode) (any, error)
-
-var opMap operateMap
-
-func init() {
-	opMap = make(operateMap)
-	opMap["+"] = func(en *EvalNode) (any, error) {
-		sum := 0
-		for _, node := range en.NodeArr[1:] {
-			num, err := strconv.Atoi(node.Value)
-			if err != nil {
-				return nil, err
-			}
-			sum += num
-		}
-		return sum, nil
-	}
-}
-
 type EvalNode struct {
-	Value   string
-	NodeArr []*EvalNode
-	Res     string
-}
-
-type EvalValue interface {
-	int | string
+	Value     string
+	NodeArr   []*EvalNode
+	ValueType int // 0:symbol,1:int,2:string
 }
 
 func NewEvalNode(str string) (*EvalNode, error) {
@@ -63,10 +39,25 @@ func (node *EvalNode) Parse() error {
 	return nil
 }
 
-// 求值
-func (node *EvalNode) Eval() error {
-	opMap[node.Value](node)
-	return nil
+// 求值，循环往下求
+func (node *EvalNode) Eval() (any, error) {
+	if len(node.NodeArr) == 0 {
+		return node.Value, nil
+	}
+	op, err := node.NodeArr[0].Eval()
+	if err != nil {
+		return nil, err
+	}
+	detailOp := op.(string)
+	if foo, ok := opMap[detailOp]; !ok {
+		return nil, errors.New("function not found")
+	} else {
+		res, err := foo(node)
+		if err != nil {
+			return nil, err
+		}
+		return res, nil
+	}
 }
 
 var left = '['
@@ -107,6 +98,7 @@ func getValue(str string) (string, error) {
 	}
 }
 
+// TODO 跳过""号
 // 分割值
 func divValue(str string) []string {
 	return strings.Fields(str)
